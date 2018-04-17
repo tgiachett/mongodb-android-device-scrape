@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const autoIncrement = require('mongoose-auto-increment');
-const connection = mongoose.createConnection('mongodb://localhost/andTabDatabase');
+ 
+// const connection = mongoose.createConnection('mongodb://localhost/andTabDatabase');
+// autoIncrement = require('mongoose-auto-increment');
 const ArticleSchema = new Schema({
 
   
@@ -23,7 +24,7 @@ const ArticleSchema = new Schema({
 
  });
 
- ArticleSchema.plugin(autoIncrement.plugin, 'Article');
- const Article = connection.model('Article', ArticleSchema);
+//  ArticleSchema.plugin(autoIncrement.plugin, 'Article');
+ const Article = mongoose.model('Article', ArticleSchema);
 
  module.exports = Article;

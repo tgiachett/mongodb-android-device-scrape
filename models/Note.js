@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
 var Schema = mongoose.Schema;
-const autoIncrement = require('mongoose-auto-increment');
-const connection = mongoose.createConnection('mongodb://localhost/andTabDatabase');
+
+// const connection = mongoose.createConnection('mongodb://localhost/andTabDatabase');
+// autoIncrement = require('mongoose-auto-increment');
 const NoteSchema = new Schema({
   
   title: String,
@@ -9,7 +10,7 @@ const NoteSchema = new Schema({
   body: String
 });
 
-ArticleSchema.plugin(autoIncrement.plugin, 'Note');
+// ArticleSchema.plugin(autoIncrement.plugin, 'Note');
 const Note = mongoose.model("Note", NoteSchema);
 
 
