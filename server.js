@@ -6,9 +6,9 @@ require('dotenv').config()
 const puppeteer = require('puppeteer');
 const app = express();
 const db = require('./models');
-const PORT = 3000;
-
+const PORT = 3001;
 let gdata;
+
 
 app.use(logger("dev"));
 app.use(bodyParser.urlencoded({ extended: true}));
@@ -18,55 +18,56 @@ mongoose.connect("mongodb://localhost/andTabDatabase")
 // autoIncrement = require('mongoose-auto-increment');
 
 
-app.get("/scrape", (req, res) => {
+app.get("/scrape", async(req, res) => {
   // puppeteer routine (chrome://inspect/#devices scrape)...
-  (async () => {
-    
+  
     const browser = await puppeteer.launch({
       headless: false,
-      userDataDir: `../Users/${process.env.USER}/AppData/Local/Google/Chrome/User Data/`,
-      executablePath: '../Program Files (x86)/Google/Chrome/Application/chrome',
+      userDataDir: `${process.env.CHROMEUSERDATEPATH}`,
+      executablePath: `${process.env.CHROMEPATH}`,
       args: ['--remote-debugging-port=9222']
     });
     const page = await browser.newPage();
     page.on('console', msg => console.log('PAGE LOG:', msg.text()));
     await page.goto('chrome://inspect/#devices');
-    await page.evaluate(() => { 
+    let gdata = await page.evaluate( async () => { 
       let data = []
-      try {
-      let arr = setTimeout(() => {
+      
+      function writeData(d) {
+        return new Promise(resolve => {
         let elements = document.getElementsByClassName('url');
-        
+      
         for (let item of elements) {
+        
+         d.push({
+          title: item.parentElement.innerText,
+          url: item.innerHTML
           
-           data.push({
-            title: item.parentElement.innerText,
-            url: item.innerHTML
-            
-        })}
-        console.log(data);
-        return data
-        //takes a little less than 8 seconds to load the remote device data
-      },8000);
+      })}
       
-      } catch (err) {
-      console.log(err)
-      }
+      resolve(console.log("is succes"))
+        })
+      }  
       
-    });
+      function remoteDeviceDelay() {
+        return new Promise(resolve => {
+          setTimeout(() => {
+            resolve("Delay")
+          }, 8000);
+        });
+      };
+      await remoteDeviceDelay();
+      await writeData(data)
+      return data
+    })
+    await writeDB(gdata)  
+     
+});
     // trim the chrome extensions trash
     // await gdata.filter((x) => !x.title.includes("extension") && !x.url.includes("extension") )
     // create a new article using the results from the scrape
-    await db.Article.create(gdata)
-      .then((dbArticle) => {
-        //console log the added result
-      }) //send error to client
-      .catch((err) =>  res.json(err));
+    
 
-    await res.send("Scrape Compete");
-  })();
-
-})
 
 app.get("/articles", function(req, res) {
   // Grab every document in the Articles collection
@@ -122,4 +123,20 @@ app.listen(PORT, function() {
   console.log("App running on port " + PORT + "!");
 });
 
-
+function writeDB(d) {
+  return new Promise(resolve => {
+    for (let i = 0; i < d.length; i++) {
+      db.Article.create(d[i])
+      .then(function(dbArticle) {
+        // View the added result in the console
+        console.log(dbArticle);
+      })
+      .catch(function(err) {
+        // If an error occurred, send it to the client
+        return res.json(err);
+      });
+      console.log(d[i]);
+    }
+  })
+  
+}
