@@ -7,7 +7,7 @@ const puppeteer = require('puppeteer');
 const app = express();
 const db = require('./models');
 const PORT = 3001;
-let gdata;
+
 
 
 app.use(logger("dev"));
@@ -23,7 +23,7 @@ app.get("/scrape", async(req, res) => {
   
     const browser = await puppeteer.launch({
       headless: false,
-      userDataDir: `${process.env.CHROMEUSERDATEPATH}`,
+      userDataDir: `${process.env.CHROMEUSERDATAPATH}`,
       executablePath: `${process.env.CHROMEPATH}`,
       args: ['--remote-debugging-port=9222']
     });
