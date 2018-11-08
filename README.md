@@ -1,3 +1,5 @@
+EDUCATIONAL WIP
+
 # mongodb-nytimes-scrape
 
 Scrapes chrome inspect for android tabs
